@@ -24,7 +24,4 @@ class Dice:
             dice.append(value)
             total += value
 
-        d = dict()
-        d.dice = dice
-        d.total = total
-        return d
+        return {'dice': dice, 'total': total}
