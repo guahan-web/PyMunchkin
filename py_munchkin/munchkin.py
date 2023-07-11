@@ -5,36 +5,20 @@ from py_munchkin.utils.player import Player
 from py_munchkin.utils.game import Game
 from py_munchkin.utils.character import Character
 from py_munchkin.utils.equipment import *
-
-def generateModifier(mod):
-    return lambda val: val + mod
+from py_munchkin.utils.door_deck import generateDoorDeck
 
 def characterMods(args):
-    # create some items
-    fallstaff = Weapon('Fall Staff', 400, 'You can use it to trip the monsters!', True)
-    fallstaff.set_modifier('run-away', generateModifier(1))
-    fallstaff.set_modifier('attack', generateModifier(4))
+    doors = generateDoorDeck()
 
-    sword = Weapon('Sword of Slaying', 300, 'something cool about the sword', True)
-    sword.set_modifier('attack', generateModifier(4))
+    item = Weapon('Toothpick', 100, 'nothing much here')
+    item.set_modifier('combat', lambda level: level + 1)
 
-    pendant = Item('Pendant of Value', 500, 'really valuable pendant')
-
-    frodo = Character()
-    print('new character...')
-    print(str(frodo))
-
-    frodo.equipItem(sword)
-    print('sword equipped!')
-    print(str(frodo))
-
-    frodo.equipItem(pendant)
-    print('pendant donned!')
-    print(str(frodo))
-
-    frodo.sellItem(pendant)
-    print('pendant sold!')
-    print(str(frodo))
+    # prepare the player character
+    player = Player()
+    player.character.equipItem(item)
+    player.character.cclass = 'cleric'
+    player.character.race = 'elf'
+    player.kickOpenTheDoor(doors)
 
 # example of some game stuff
 def startGame(args):

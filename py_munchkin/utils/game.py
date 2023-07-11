@@ -1,4 +1,6 @@
 from py_munchkin.utils.eventbus import EventBus
+from py_munchkin.utils.monster import Monster
+from py_munchkin.utils.door_deck import generateDoorDeck
 
 class Game:
     def __init__(self, max_players = 4):
@@ -6,6 +8,8 @@ class Game:
         self.players = []
         self.current_player = None
         self.max_players = max_players
+        self.doors = generateDoorDeck()
+        
 
     def addPlayer(self, player):
         if len(self.players) >= self.max_players:
