@@ -3,6 +3,38 @@ from py_munchkin.utils.die import *
 from py_munchkin.utils.cards import Deck
 from py_munchkin.utils.player import Player
 from py_munchkin.utils.game import Game
+from py_munchkin.utils.character import Character
+from py_munchkin.utils.equipment import *
+
+def generateModifier(mod):
+    return lambda val: val + mod
+
+def characterMods(args):
+    # create some items
+    fallstaff = Weapon('Fall Staff', 400, 'You can use it to trip the monsters!', True)
+    fallstaff.set_modifier('run-away', generateModifier(1))
+    fallstaff.set_modifier('attack', generateModifier(4))
+
+    sword = Weapon('Sword of Slaying', 300, 'something cool about the sword', True)
+    sword.set_modifier('attack', generateModifier(4))
+
+    pendant = Item('Pendant of Value', 500, 'really valuable pendant')
+
+    frodo = Character()
+    print('new character...')
+    print(str(frodo))
+
+    frodo.equipItem(sword)
+    print('sword equipped!')
+    print(str(frodo))
+
+    frodo.equipItem(pendant)
+    print('pendant donned!')
+    print(str(frodo))
+
+    frodo.sellItem(pendant)
+    print('pendant sold!')
+    print(str(frodo))
 
 # example of some game stuff
 def startGame(args):
@@ -75,6 +107,9 @@ def main():
 
     game_parser = subparsers.add_parser('game', help='game help')
     game_parser.set_defaults(func=startGame)
+
+    character_parser = subparsers.add_parser('character', help='character help')
+    character_parser.set_defaults(func=characterMods)
 
     args = parser.parse_args()
     args.func(args)
