@@ -10,14 +10,11 @@ from py_munchkin.utils.door_deck import generateDoorDeck
 def characterMods(args):
     doors = generateDoorDeck()
 
-    item = Weapon('Toothpick', 100, 'nothing much here')
-    item.set_modifier('combat', lambda level: level + 1)
-
     # prepare the player character
     player = Player()
-    player.character.equipItem(item)
     player.character.cclass = 'cleric'
     player.character.race = 'elf'
+    print(str(player.character))
     player.kickOpenTheDoor(doors)
 
 # example of some game stuff

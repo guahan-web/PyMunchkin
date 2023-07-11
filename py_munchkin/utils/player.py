@@ -9,6 +9,7 @@ class Player:
         self.name = name
         self.hand = []
         self.character = Character()
+        self.die = Die(6)
 
     def drawCard(self, deck):
         self.hand.append(deck.drawCard())
@@ -39,22 +40,18 @@ class Player:
             treasures = monster.apply_modifiers('treasure', monster.treasures, self.character)
             print('Collect {} treasures!'.format(treasures))
         else:
+            print('Attempting to run away...')
             # monster wins, must attempt to run away
-            escaped = self.runAway()
-            escaped = monster.apply_modifiers('run-away', escaped, self.character)
-            if escaped == True:
-                # success
-                print('You survived to fight another day!')
-            else:
+            roll = monster.apply_modifiers('run-away', self.die.roll(), self.character)
+            print('FYI, effective roll: {}'.format(roll))
+            if roll < 5:
                 # failure
                 print('Out of luck!')
                 self.character.levelDown() # default to losing one level
+            else:
+                # success
+                print('You survived to fight another day!')
         
-
-    # action that requires rolling a 5 or 6 on a 6-sided die
-    def runAway(self):
-        die = Die(6)
-        return (die.roll() >= 5)
 
     def showHand(self):
         for card in self.hand:

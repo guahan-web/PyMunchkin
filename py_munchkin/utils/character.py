@@ -15,6 +15,8 @@ class Character:
     def __str__(self):
         text="""Character info:
     level: {level}
+    race: {race}
+    class: {cclass}
     combat: {combat}
     equipment: {equipment}
     carrying: {carrying}
@@ -23,6 +25,8 @@ class Character:
 
         return text.format(
             level=self.base_level,
+            race=self.race,
+            cclass=self.cclass,
             combat=self.getEffectiveLevel(),
             equipment=len(self.equipped),
             carrying=len(self.carrying),
