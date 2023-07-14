@@ -1,21 +1,80 @@
 import argparse
+from InquirerPy import inquirer
+from InquirerPy.base.control import Choice
+from InquirerPy.utils import color_print
 from py_munchkin.utils.die import *
 from py_munchkin.utils.cards import Deck
 from py_munchkin.utils.player import Player
 from py_munchkin.utils.game import Game
-from py_munchkin.utils.character import Character
-from py_munchkin.utils.equipment import *
-from py_munchkin.utils.door_deck import generateDoorDeck
+from py_munchkin.utils.items import *
 
-def characterMods(args):
-    doors = generateDoorDeck()
+def runDemo(args):
+    # for demo, hard-code a list of options
+    races = ['elf', 'human', 'dwarf', 'halfling', 'orc', 'gnome']
+    classes = ['cleric', 'wizard', 'warrior', 'thief', 'bard', 'ranger']
 
-    # prepare the player character
+    # prompt the user to select a race
+    selected_race = inquirer.select(
+        message='Select a race:',
+        choices=map(lambda race: Choice(race, name=race.capitalize()), races),
+        default=None,
+    ).execute()
+
+    # prompt the user to select a class
+    selected_class = inquirer.select(
+        message='Select a character class:',
+        choices=map(lambda c: Choice(c, name=c.capitalize()), classes),
+        default=None,
+    ).execute()
+
+    # set up a new game and test a couple actions
+    game = Game()
+
     player = Player()
-    player.character.cclass = 'cleric'
-    player.character.race = 'elf'
+    player.character.cclass = selected_class
+    player.character.race = selected_race
+
+    game.addPlayer(player)
+    game.start() # start the turn cycle
+
+    # for demo purposes, give a choice of three random items to equip
+    demo_items = [
+        game.treasures.drawCard(),
+        game.treasures.drawCard(),
+        game.treasures.drawCard(),
+    ]
+
+    selected_item = inquirer.select(
+        message='Select a starting item:',
+        choices=[
+            Choice(i, '{name} ({bonus}){description}'.format(
+                name=x.name,
+                bonus=('+' + str(x.bonus) + ' BONUS') if x.bonus > 0 else 'no bonus',
+                description=(': ' + x.description) if x.description != '' else '',
+            )) for i,x in enumerate(demo_items)
+        ]
+    ).execute()
+
+    # clean up demo items (discard unselected)
+    for i in range(len(demo_items)):
+        if i == selected_item:
+            try:
+                item = demo_items[selected_item]
+                player.character.equipItem(item)
+                color_print([('#1fb82e', 'Equipped: '), ('#ffffff', item.name)])
+            except Exception as e:
+                color_print([('#e5c07b', 'Poor choice: '), ('#ffffff', str(e))])
+        else:
+            game.discardCard(demo_items[i])
+    demo_items.clear()
+
+    # start the first phase of your turn
+    game.kickOpenDoor()
+
+    # show the summary of the character now
+    print()
     print(str(player.character))
-    player.kickOpenTheDoor(doors)
+    player.showHand()
 
 # example of some game stuff
 def startGame(args):
@@ -51,6 +110,7 @@ def startGame(args):
 # example of some card stuff
 def drawCards(args):
     deck = Deck()
+    deck.build()
     deck.shuffle()
 
     player = Player()
@@ -89,8 +149,8 @@ def main():
     game_parser = subparsers.add_parser('game', help='game help')
     game_parser.set_defaults(func=startGame)
 
-    character_parser = subparsers.add_parser('character', help='character help')
-    character_parser.set_defaults(func=characterMods)
+    character_parser = subparsers.add_parser('demo', help='demo help')
+    character_parser.set_defaults(func=runDemo)
 
     args = parser.parse_args()
     args.func(args)

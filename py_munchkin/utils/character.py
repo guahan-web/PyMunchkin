@@ -1,4 +1,4 @@
-from py_munchkin.utils.equipment import *
+from py_munchkin.utils.items import *
 
 MAX_HANDS = 2
 LEVEL_COST = 1000
@@ -14,10 +14,9 @@ class Character:
 
     def __str__(self):
         text="""Character info:
-    level: {level}
+    level: {level} ({bonus})
     race: {race}
     class: {cclass}
-    combat: {combat}
     equipment: {equipment}
     carrying: {carrying}
     gold: {gold}
@@ -25,9 +24,9 @@ class Character:
 
         return text.format(
             level=self.base_level,
+            bonus=self.getLevelModifier(),
             race=self.race,
             cclass=self.cclass,
-            combat=self.getEffectiveLevel(),
             equipment=len(self.equipped),
             carrying=len(self.carrying),
             gold=self.gold
@@ -39,7 +38,8 @@ class Character:
 
     # decrease character level by X
     def levelDown(self, level = 1):
-        self.base_level -= level
+        if self.base_level > 0:
+            self.base_level -= level
 
     # if an item is in inventory, trade it for gold
     def sellItem(self, item):
@@ -100,15 +100,19 @@ class Character:
 
         return False
     
-    def hasHeadgear(self):
+    def getEquipmentByType(self, type):
         for i in self.equipped:
-            if isinstance(i, Headgear): return True
-        return False
+            if isinstance(i, type): return i
+        return None
+    
+    def hasHeadgear(self):
+        return (self.getEquipmentByType(Headgear) != None)
     
     def hasFootgear(self):
-        for i in self.equipped:
-            if isinstance(i, Footgear): return True
-        return False
+        return (self.getEquipmentByType(Footgear) != None)
+    
+    def hasArmor(self):
+        return (self.getEquipmentByType(Armor) != None)
 
     # based see how many hands we have free
     # TODO: figure out how race exceptions can apply
@@ -121,11 +125,13 @@ class Character:
         return available
     
     # calculate attack power based on base level
-    def getEffectiveLevel(self, penalties = []):
-        level = self.base_level
+    def getLevelModifier(self):
+        modifier = 0
         for item in self.equipped:
-            level = item.apply_modifiers('combat', level)
-        # if penalties provided, honor them
-        for p in penalties:
-            level = p(level)
-        return level
+            modifier = item.apply_modifiers('combat', modifier)
+        return modifier
+    
+    def applyRunAwayBonus(self, roll):
+        for item in self.equipped:
+            roll = item.apply_modifiers('run-away', roll)
+        return roll

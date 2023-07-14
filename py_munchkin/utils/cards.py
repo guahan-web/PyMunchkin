@@ -1,4 +1,6 @@
 import random
+from py_munchkin.utils.treasures.equipment import generateAllEquipmentCards
+from py_munchkin.utils.doors.monsters import generateAllMonsterCards
 
 suits = ['Hearts', 'Diamonds', 'Spades', 'Clubs']
 
@@ -14,7 +16,6 @@ class Card:
 class Deck:
     def __init__(self):
         self.cards = []
-        self.build()
 
     def build(self):
         for s in range(1, 5):
@@ -31,4 +32,32 @@ class Deck:
             self.cards[i], self.cards[r] = self.cards[r], self.cards[i]
 
     def drawCard(self):
-        return self.cards.pop()
+        if len(self.cards) > 0:
+            return self.cards.pop()
+        else:
+            return None
+    
+    def addCard(self, card):
+        self.cards.append(card)
+
+def getTreasureDeck():
+    deck = Deck()
+    
+    # add equipment cards
+    cards = generateAllEquipmentCards()
+    for c in cards:
+        deck.addCard(c)
+
+    return deck
+
+def getDoorDeck():
+    deck = Deck()
+
+    # add monsters
+    cards = generateAllMonsterCards()
+    for c in cards:
+        deck.addCard(c)
+
+    return deck
+    
+
